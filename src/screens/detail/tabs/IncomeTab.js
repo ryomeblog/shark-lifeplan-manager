@@ -1,20 +1,14 @@
-import { observer } from "mobx-react-lite";
-import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { PieChart } from "react-native-chart-kit";
-import {
-  DataTable,
-  FAB,
-  IconButton,
-  Portal,
-  Text,
-  useTheme,
-} from "react-native-paper";
-import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../../constants";
-import { rootStore } from "../../../stores/RootStore";
-import { formatCurrency } from "../../../utils/format";
-import IncomeModal from "../components/IncomeModal";
+import { observer } from 'mobx-react-lite';
+import { nanoid } from 'nanoid';
+import React, { useMemo, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
+import { DataTable, FAB, IconButton, Portal, Text, useTheme } from 'react-native-paper';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../../constants';
+import { rootStore } from '../../../stores/RootStore';
+import { formatCurrency } from '../../../utils/format';
+import IncomeModal from '../components/IncomeModal';
 
 /**
  * 収入タブ
@@ -32,14 +26,14 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
    */
   const categoryData = useMemo(() => {
     const data = new Map();
-    yearData.incomes.forEach((income) => {
+    yearData.incomes.forEach(income => {
       const amount = data.get(income.category) || 0;
       data.set(income.category, amount + income.amount);
     });
 
     const categories = rootStore.categoryStore.sortedIncomeCategories;
     return Array.from(data.entries()).map(([category, amount]) => {
-      const categoryInfo = categories.find((c) => c.name === category);
+      const categoryInfo = categories.find(c => c.name === category);
       return {
         name: category,
         amount,
@@ -60,10 +54,10 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
   /**
    * 収入の作成
    */
-  const handleCreate = (data) => {
+  const handleCreate = data => {
     if (Array.isArray(data)) {
       // グループからの一括追加の場合
-      const newIncomes = data.map((item) => ({ id: nanoid(), ...item }));
+      const newIncomes = data.map(item => ({ id: nanoid(), ...item }));
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
         incomes: [...yearData.incomes, ...newIncomes],
       });
@@ -79,9 +73,9 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
   /**
    * 収入の更新
    */
-  const handleUpdate = (data) => {
+  const handleUpdate = data => {
     if (editingIncome) {
-      const updatedIncomes = yearData.incomes.map((income) =>
+      const updatedIncomes = yearData.incomes.map(income =>
         income.id === editingIncome.id ? { ...income, ...data } : income,
       );
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
@@ -97,9 +91,7 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
    */
   const handleDelete = () => {
     if (editingIncome) {
-      const updatedIncomes = yearData.incomes.filter(
-        (income) => income.id !== editingIncome.id,
-      );
+      const updatedIncomes = yearData.incomes.filter(income => income.id !== editingIncome.id);
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
         incomes: updatedIncomes,
       });
@@ -116,7 +108,7 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
           <View style={styles.chartContainer}>
             <PieChart
               data={categoryData}
-              width={DEVICE.width - THEME.spacing.lg * 2}
+              width={Dimensions.get('window').width - THEME.spacing.lg * 2}
               height={220}
               chartConfig={{
                 color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
@@ -126,9 +118,7 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
               paddingLeft="15"
               absolute
             />
-            <Text style={styles.totalAmount}>
-              総収入額: {formatCurrency(totalIncome)}
-            </Text>
+            <Text style={styles.totalAmount}>総収入額: {formatCurrency(totalIncome)}</Text>
           </View>
         ) : (
           <View style={styles.emptyChart}>
@@ -146,13 +136,11 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
             <DataTable.Title numeric>アクション</DataTable.Title>
           </DataTable.Header>
 
-          {yearData.incomes.map((income) => (
+          {yearData.incomes.map(income => (
             <DataTable.Row key={income.id}>
               <DataTable.Cell>{income.name}</DataTable.Cell>
               <DataTable.Cell>{income.category}</DataTable.Cell>
-              <DataTable.Cell numeric>
-                {formatCurrency(income.amount)}
-              </DataTable.Cell>
+              <DataTable.Cell numeric>{formatCurrency(income.amount)}</DataTable.Cell>
               <DataTable.Cell numeric>{income.frequency}</DataTable.Cell>
               <DataTable.Cell numeric>
                 <View style={styles.actions}>
@@ -181,7 +169,7 @@ const IncomeTab = observer(({ lifePlanId, yearData }) => {
 
       {/* FABボタン */}
       <FAB
-        icon="plus"
+        icon="plus-circle"
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         onPress={() => setModalVisible(true)}
       />
@@ -225,28 +213,28 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     padding: THEME.spacing.lg,
-    alignItems: "center",
+    alignItems: 'center',
   },
   totalAmount: {
     fontSize: THEME.typography.h4,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: THEME.spacing.md,
   },
   emptyChart: {
     height: 220,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: THEME.typography.body1,
     color: COLORS.grey[600],
   },
   actions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     margin: THEME.spacing.md,
     right: 0,
     bottom: 0,

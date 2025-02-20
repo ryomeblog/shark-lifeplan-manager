@@ -1,20 +1,13 @@
-import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import {
-  Button,
-  IconButton,
-  List,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-} from "react-native-paper";
-import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import NumberInput from "../../../components/forms/NumberInput";
-import { COLORS, THEME } from "../../../constants";
-import { rootStore } from "../../../stores/RootStore";
-import { formatCurrency } from "../../../utils/format";
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, IconButton, List, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import NumberInput from '../../../components/forms/NumberInput';
+import { COLORS, THEME } from '../../../constants';
+import { rootStore } from '../../../stores/RootStore';
+import { formatCurrency } from '../../../utils/format';
+import { logModalShow } from '../../../utils/logger';
 
 /**
  * 支出グループ管理モーダル
@@ -27,11 +20,11 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   // フォームの状態管理
-  const [name, setName] = useState("");
-  const [itemName, setItemName] = useState("");
+  const [name, setName] = useState('');
+  const [itemName, setItemName] = useState('');
   const [amount, setAmount] = useState(0);
-  const [frequency, setFrequency] = useState("monthly");
-  const [category, setCategory] = useState("");
+  const [frequency, setFrequency] = useState('monthly');
+  const [category, setCategory] = useState('');
   const [error, setError] = useState(null);
 
   const expenseGroups = rootStore.groupStore.sortedExpenseGroups;
@@ -42,7 +35,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
    */
   const handleCreateGroup = () => {
     if (!name.trim()) {
-      setError("グループ名を入力してください");
+      setError('グループ名を入力してください');
       return;
     }
 
@@ -59,7 +52,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
    */
   const handleUpdateGroup = () => {
     if (!name.trim()) {
-      setError("グループ名を入力してください");
+      setError('グループ名を入力してください');
       return;
     }
 
@@ -87,15 +80,15 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
    */
   const handleSaveItem = () => {
     if (!itemName.trim()) {
-      setError("項目名を入力してください");
+      setError('項目名を入力してください');
       return;
     }
     if (!category) {
-      setError("カテゴリを選択してください");
+      setError('カテゴリを選択してください');
       return;
     }
     if (amount <= 0) {
-      setError("金額を入力してください");
+      setError('金額を入力してください');
       return;
     }
 
@@ -108,11 +101,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
     };
 
     if (editingItem) {
-      rootStore.groupStore.updateExpenseGroupItem(
-        editingGroup.id,
-        editingItem.id,
-        item,
-      );
+      rootStore.groupStore.updateExpenseGroupItem(editingGroup.id, editingItem.id, item);
     } else {
       rootStore.groupStore.addExpenseGroupItem(editingGroup.id, item);
     }
@@ -123,7 +112,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
   /**
    * 支出項目の削除
    */
-  const handleDeleteItem = (itemId) => {
+  const handleDeleteItem = itemId => {
     rootStore.groupStore.removeExpenseGroupItem(editingGroup.id, itemId);
   };
 
@@ -131,7 +120,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
    * グループフォームのリセット
    */
   const resetGroupForm = () => {
-    setName("");
+    setName('');
     setEditingGroup(null);
     setError(null);
   };
@@ -140,10 +129,10 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
    * 支出項目フォームのリセット
    */
   const resetItemForm = () => {
-    setItemName("");
+    setItemName('');
     setAmount(0);
-    setFrequency("monthly");
-    setCategory("");
+    setFrequency('monthly');
+    setCategory('');
     setEditingItem(null);
     setShowItemForm(false);
     setError(null);
@@ -152,7 +141,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
   /**
    * グループ編集の開始
    */
-  const startEditingGroup = (group) => {
+  const startEditingGroup = group => {
     setEditingGroup(group);
     setName(group.name);
   };
@@ -160,7 +149,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
   /**
    * 支出項目編集の開始
    */
-  const startEditingItem = (item) => {
+  const startEditingItem = item => {
     setEditingItem(item);
     setItemName(item.name);
     setAmount(item.amount);
@@ -183,21 +172,20 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
       <Modal
         visible={visible}
         onDismiss={handleDismiss}
-        contentContainerStyle={styles.modalContainer}
-      >
+        onShow={() => logModalShow('支出グループ管理モーダル')}
+        contentContainerStyle={styles.modalContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>支出グループ管理</Text>
         </View>
 
         <ScrollView style={styles.content}>
           {/* グループ一覧 */}
-          {expenseGroups.map((group) => (
+          {expenseGroups.map(group => (
             <List.Accordion
               key={group.id}
               title={group.name}
               description={`${group.items.length}個の支出項目`}
-              left={(props) => <List.Icon {...props} icon="folder" />}
-            >
+              left={props => <List.Icon {...props} icon="folder" />}>
               {/* グループのアクション */}
               <View style={styles.groupActions}>
                 <Button
@@ -206,14 +194,10 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
                     startEditingGroup(group);
                     setShowItemForm(true);
                   }}
-                  style={styles.actionButton}
-                >
+                  style={styles.actionButton}>
                   項目を追加
                 </Button>
-                <IconButton
-                  icon="pencil"
-                  onPress={() => startEditingGroup(group)}
-                />
+                <IconButton icon="pencil" onPress={() => startEditingGroup(group)} />
                 <IconButton
                   icon="delete"
                   onPress={() => {
@@ -224,23 +208,19 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
               </View>
 
               {/* 支出項目一覧 */}
-              {group.items.map((item) => (
+              {group.items.map(item => (
                 <List.Item
                   key={item.id}
                   title={item.name}
                   description={`${formatCurrency(item.amount)} / ${item.frequency}`}
-                  left={(props) => (
+                  left={props => (
                     <View style={styles.categoryIndicator}>
                       <Text style={styles.categoryText}>{item.category}</Text>
                     </View>
                   )}
-                  right={(props) => (
+                  right={props => (
                     <View style={styles.itemActions}>
-                      <IconButton
-                        icon="pencil"
-                        size={20}
-                        onPress={() => startEditingItem(item)}
-                      />
+                      <IconButton icon="pencil" size={20} onPress={() => startEditingItem(item)} />
                       <IconButton
                         icon="delete"
                         size={20}
@@ -263,11 +243,7 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
                 style={styles.input}
               />
               {error && <Text style={styles.errorText}>{error}</Text>}
-              <Button
-                mode="contained"
-                onPress={handleCreateGroup}
-                style={styles.submitButton}
-              >
+              <Button mode="contained" onPress={handleCreateGroup} style={styles.submitButton}>
                 グループを作成
               </Button>
             </View>
@@ -289,63 +265,30 @@ const ExpenseGroupModal = observer(({ visible, onDismiss }) => {
                 format="currency"
                 style={styles.input}
               />
-              <List.Accordion
-                title="頻度"
-                description={frequency}
-                style={styles.input}
-              >
-                <List.Item
-                  title="1回のみ"
-                  onPress={() => setFrequency("once")}
-                />
-                <List.Item
-                  title="毎月"
-                  onPress={() => setFrequency("monthly")}
-                />
-                <List.Item
-                  title="毎年"
-                  onPress={() => setFrequency("yearly")}
-                />
+              <List.Accordion title="頻度" description={frequency} style={styles.input}>
+                <List.Item title="1回のみ" onPress={() => setFrequency('once')} />
+                <List.Item title="毎月" onPress={() => setFrequency('monthly')} />
+                <List.Item title="毎年" onPress={() => setFrequency('yearly')} />
               </List.Accordion>
-              <List.Accordion
-                title="カテゴリ"
-                description={category}
-                style={styles.input}
-              >
-                {expenseCategories.map((cat) => (
-                  <List.Item
-                    key={cat.id}
-                    title={cat.name}
-                    onPress={() => setCategory(cat.name)}
-                  />
+              <List.Accordion title="カテゴリ" description={category} style={styles.input}>
+                {expenseCategories.map(cat => (
+                  <List.Item key={cat.id} title={cat.name} onPress={() => setCategory(cat.name)} />
                 ))}
               </List.Accordion>
               {error && <Text style={styles.errorText}>{error}</Text>}
-              <Button
-                mode="contained"
-                onPress={handleSaveItem}
-                style={styles.submitButton}
-              >
-                {editingItem ? "項目を更新" : "項目を追加"}
+              <Button mode="contained" onPress={handleSaveItem} style={styles.submitButton}>
+                {editingItem ? '項目を更新' : '項目を追加'}
               </Button>
             </View>
           )}
         </ScrollView>
 
         <View style={styles.footer}>
-          <Button
-            mode="outlined"
-            onPress={handleDismiss}
-            style={styles.footerButton}
-          >
+          <Button mode="outlined" onPress={handleDismiss} style={styles.footerButton}>
             閉じる
           </Button>
           {editingGroup && !showItemForm && (
-            <Button
-              mode="contained"
-              onPress={handleUpdateGroup}
-              style={styles.footerButton}
-            >
+            <Button mode="contained" onPress={handleUpdateGroup} style={styles.footerButton}>
               グループを更新
             </Button>
           )}
@@ -374,7 +317,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.common.white,
     margin: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.md,
-    maxHeight: "90%",
+    maxHeight: '90%',
   },
   header: {
     padding: THEME.spacing.md,
@@ -383,14 +326,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: THEME.typography.h3,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   content: {
     padding: THEME.spacing.md,
   },
   groupActions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: THEME.spacing.md,
     paddingVertical: THEME.spacing.sm,
     backgroundColor: COLORS.grey[100],
@@ -409,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: THEME.typography.caption,
   },
   itemActions: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   form: {
     marginTop: THEME.spacing.lg,
@@ -430,8 +373,8 @@ const styles = StyleSheet.create({
     marginTop: THEME.spacing.sm,
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     padding: THEME.spacing.md,
     borderTopWidth: 1,
     borderTopColor: COLORS.grey[200],

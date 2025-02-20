@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, Modal, Portal, RadioButton, Text } from "react-native-paper";
-import { COLORS, THEME } from "../../../constants";
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Button, Modal, Portal, RadioButton, Text } from 'react-native-paper';
+import { COLORS, THEME } from '../../../constants';
+import { logModalShow } from '../../../utils/logger';
 
 /**
  * 年別データコピーモーダル
@@ -13,13 +14,7 @@ import { COLORS, THEME } from "../../../constants";
  * @param {number} props.currentYear - コピー元の年
  * @param {Array} props.yearlyFinances - 年別財務データの配列
  */
-const YearCopyModal = ({
-  visible,
-  onDismiss,
-  onSubmit,
-  currentYear,
-  yearlyFinances,
-}) => {
+const YearCopyModal = ({ visible, onDismiss, onSubmit, currentYear, yearlyFinances }) => {
   const [selectedYear, setSelectedYear] = useState(null);
 
   /**
@@ -42,7 +37,7 @@ const YearCopyModal = ({
 
   // コピー元の年を除外した選択可能な年のリスト
   const availableYears = yearlyFinances
-    .filter((yf) => yf.year !== currentYear)
+    .filter(yf => yf.year !== currentYear)
     .sort((a, b) => a.year - b.year);
 
   return (
@@ -50,8 +45,8 @@ const YearCopyModal = ({
       <Modal
         visible={visible}
         onDismiss={handleDismiss}
-        contentContainerStyle={styles.modalContainer}
-      >
+        onShow={() => logModalShow('年別データコピーモーダル')}
+        contentContainerStyle={styles.modalContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>年別データのコピー</Text>
         </View>
@@ -61,11 +56,8 @@ const YearCopyModal = ({
             {currentYear}年のデータをコピーする年を選択してください
           </Text>
 
-          <RadioButton.Group
-            onValueChange={(value) => setSelectedYear(value)}
-            value={selectedYear}
-          >
-            {availableYears.map((yearData) => (
+          <RadioButton.Group onValueChange={value => setSelectedYear(value)} value={selectedYear}>
+            {availableYears.map(yearData => (
               <View key={yearData.id} style={styles.radioItem}>
                 <RadioButton.Item
                   label={`${yearData.year}年`}
@@ -78,26 +70,19 @@ const YearCopyModal = ({
           </RadioButton.Group>
 
           {availableYears.length === 0 && (
-            <Text style={styles.emptyText}>
-              コピー先として選択可能な年がありません
-            </Text>
+            <Text style={styles.emptyText}>コピー先として選択可能な年がありません</Text>
           )}
         </View>
 
         <View style={styles.footer}>
-          <Button
-            mode="outlined"
-            onPress={handleDismiss}
-            style={styles.footerButton}
-          >
+          <Button mode="outlined" onPress={handleDismiss} style={styles.footerButton}>
             キャンセル
           </Button>
           <Button
             mode="contained"
             onPress={handleSubmit}
             disabled={!selectedYear || availableYears.length === 0}
-            style={styles.footerButton}
-          >
+            style={styles.footerButton}>
             コピー
           </Button>
         </View>
@@ -111,7 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.common.white,
     margin: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.md,
-    maxHeight: "90%",
+    maxHeight: '90%',
   },
   header: {
     padding: THEME.spacing.md,
@@ -120,7 +105,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: THEME.typography.h3,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   content: {
     padding: THEME.spacing.md,
@@ -139,12 +124,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: THEME.typography.body1,
     color: COLORS.grey[600],
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: THEME.spacing.lg,
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     padding: THEME.spacing.md,
     borderTopWidth: 1,
     borderTopColor: COLORS.grey[200],

@@ -1,7 +1,8 @@
-import { observer } from "mobx-react-lite";
-import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { LineChart, PieChart } from "react-native-chart-kit";
+import { observer } from 'mobx-react-lite';
+import { nanoid } from 'nanoid';
+import React, { useMemo, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { LineChart, PieChart } from 'react-native-chart-kit';
 import {
   Card,
   DataTable,
@@ -12,12 +13,12 @@ import {
   Text,
   Title,
   useTheme,
-} from "react-native-paper";
-import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../../constants";
-import { rootStore } from "../../../stores/RootStore";
-import { formatCurrency, formatPercentage } from "../../../utils/format";
-import AssetModal from "../components/AssetModal";
+} from 'react-native-paper';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../../constants';
+import { rootStore } from '../../../stores/RootStore';
+import { formatCurrency, formatPercentage } from '../../../utils/format';
+import AssetModal from '../components/AssetModal';
 
 /**
  * 資産タブ
@@ -35,14 +36,14 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
    */
   const categoryData = useMemo(() => {
     const data = new Map();
-    yearData.assets.forEach((asset) => {
+    yearData.assets.forEach(asset => {
       const amount = data.get(asset.category) || 0;
       data.set(asset.category, amount + asset.initialAmount);
     });
 
     const categories = rootStore.categoryStore.sortedAssetCategories;
     return Array.from(data.entries()).map(([category, amount]) => {
-      const categoryInfo = categories.find((c) => c.name === category);
+      const categoryInfo = categories.find(c => c.name === category);
       return {
         name: category,
         amount,
@@ -62,26 +63,20 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
     let totalCapitalGain = 0;
     let totalDividend = 0;
 
-    yearData.assets.forEach((asset) => {
+    yearData.assets.forEach(asset => {
       totalInitialAmount += asset.initialAmount;
 
-      const performance = asset.yearlyPerformance.find(
-        (p) => p.year === yearData.year,
-      );
+      const performance = asset.yearlyPerformance.find(p => p.year === yearData.year);
 
       if (performance) {
-        totalCurrentAmount +=
-          performance.actualEndValue || performance.endValue;
-        totalCapitalGain +=
-          performance.actualCapitalGains || performance.capitalGains;
-        totalDividend +=
-          performance.actualTotalDividends || performance.totalDividends;
+        totalCurrentAmount += performance.actualEndValue || performance.endValue;
+        totalCapitalGain += performance.actualCapitalGains || performance.capitalGains;
+        totalDividend += performance.actualTotalDividends || performance.totalDividends;
       }
     });
 
     const totalReturn = totalCapitalGain + totalDividend;
-    const returnRate =
-      totalInitialAmount > 0 ? totalReturn / totalInitialAmount : 0;
+    const returnRate = totalInitialAmount > 0 ? totalReturn / totalInitialAmount : 0;
 
     return {
       initialAmount: totalInitialAmount,
@@ -91,7 +86,7 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
       totalReturn,
       returnRate,
     };
-  }, [yearData.assets]);
+  }, [yearData.assets, yearData.year]);
 
   /**
    * パフォーマンスグラフのデータを作成
@@ -101,10 +96,8 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
     const expectedData = new Array(12).fill(0);
     const actualData = new Array(12).fill(0);
 
-    yearData.assets.forEach((asset) => {
-      const performance = asset.yearlyPerformance.find(
-        (p) => p.year === yearData.year,
-      );
+    yearData.assets.forEach(asset => {
+      const performance = asset.yearlyPerformance.find(p => p.year === yearData.year);
 
       if (performance) {
         const monthlyGain = performance.capitalGains / 12;
@@ -113,21 +106,16 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
         months.forEach((_, index) => {
           expectedData[index] += monthlyGain + monthlyDividend;
 
-          if (
-            performance.actualCapitalGains &&
-            performance.actualTotalDividends
-          ) {
+          if (performance.actualCapitalGains && performance.actualTotalDividends) {
             actualData[index] +=
-              (performance.actualCapitalGains +
-                performance.actualTotalDividends) /
-              12;
+              (performance.actualCapitalGains + performance.actualTotalDividends) / 12;
           }
         });
       }
     });
 
     return {
-      labels: months.map((m) => `${m}月`),
+      labels: months.map(m => `${m}月`),
       datasets: [
         {
           data: expectedData,
@@ -141,12 +129,12 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
         },
       ],
     };
-  }, [yearData.assets]);
+  }, [yearData.assets, yearData.year]);
 
   /**
    * 資産の作成
    */
-  const handleCreate = (data) => {
+  const handleCreate = data => {
     rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
       assets: [...yearData.assets, { id: nanoid(), ...data }],
     });
@@ -156,9 +144,9 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
   /**
    * 資産の更新
    */
-  const handleUpdate = (data) => {
+  const handleUpdate = data => {
     if (editingAsset) {
-      const updatedAssets = yearData.assets.map((asset) =>
+      const updatedAssets = yearData.assets.map(asset =>
         asset.id === editingAsset.id ? { ...asset, ...data } : asset,
       );
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
@@ -174,9 +162,7 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
    */
   const handleDelete = () => {
     if (editingAsset) {
-      const updatedAssets = yearData.assets.filter(
-        (asset) => asset.id !== editingAsset.id,
-      );
+      const updatedAssets = yearData.assets.filter(asset => asset.id !== editingAsset.id);
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
         assets: updatedAssets,
       });
@@ -209,24 +195,18 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Paragraph>キャピタルゲイン</Paragraph>
-                <Text style={styles.summaryValue}>
-                  {formatCurrency(assetSummary.capitalGain)}
-                </Text>
+                <Text style={styles.summaryValue}>{formatCurrency(assetSummary.capitalGain)}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Paragraph>配当収入</Paragraph>
-                <Text style={styles.summaryValue}>
-                  {formatCurrency(assetSummary.dividend)}
-                </Text>
+                <Text style={styles.summaryValue}>{formatCurrency(assetSummary.dividend)}</Text>
               </View>
             </View>
             <View style={styles.totalReturn}>
               <Paragraph>総リターン</Paragraph>
               <Text style={styles.totalReturnValue}>
-                {formatCurrency(assetSummary.totalReturn)}{" "}
-                <Text style={styles.returnRate}>
-                  ({formatPercentage(assetSummary.returnRate)})
-                </Text>
+                {formatCurrency(assetSummary.totalReturn)}{' '}
+                <Text style={styles.returnRate}>({formatPercentage(assetSummary.returnRate)})</Text>
               </Text>
             </View>
           </Card.Content>
@@ -238,7 +218,7 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
             <Title>資産配分</Title>
             <PieChart
               data={categoryData}
-              width={DEVICE.width - THEME.spacing.lg * 2}
+              width={Dimensions.get('window').width - THEME.spacing.lg * 2}
               height={220}
               chartConfig={{
                 color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
@@ -262,7 +242,7 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
               <Title>パフォーマンス推移</Title>
               <LineChart
                 data={performanceData}
-                width={DEVICE.width - THEME.spacing.lg * 2}
+                width={Dimensions.get('window').width - THEME.spacing.lg * 2}
                 height={220}
                 chartConfig={{
                   backgroundColor: COLORS.common.white,
@@ -279,15 +259,11 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
               />
               <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
-                  <View
-                    style={[styles.legendColor, { backgroundColor: "#2196F3" }]}
-                  />
+                  <View style={[styles.legendColor, { backgroundColor: '#2196F3' }]} />
                   <Text>予想</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View
-                    style={[styles.legendColor, { backgroundColor: "#4CAF50" }]}
-                  />
+                  <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
                   <Text>実績</Text>
                 </View>
               </View>
@@ -305,10 +281,8 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
             <DataTable.Title numeric>アクション</DataTable.Title>
           </DataTable.Header>
 
-          {yearData.assets.map((asset) => {
-            const performance = asset.yearlyPerformance.find(
-              (p) => p.year === yearData.year,
-            );
+          {yearData.assets.map(asset => {
+            const performance = asset.yearlyPerformance.find(p => p.year === yearData.year);
             const currentValue = performance
               ? performance.actualEndValue || performance.endValue
               : asset.initialAmount;
@@ -317,12 +291,8 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
               <DataTable.Row key={asset.id}>
                 <DataTable.Cell>{asset.name}</DataTable.Cell>
                 <DataTable.Cell>{asset.category}</DataTable.Cell>
-                <DataTable.Cell numeric>
-                  {formatCurrency(asset.initialAmount)}
-                </DataTable.Cell>
-                <DataTable.Cell numeric>
-                  {formatCurrency(currentValue)}
-                </DataTable.Cell>
+                <DataTable.Cell numeric>{formatCurrency(asset.initialAmount)}</DataTable.Cell>
+                <DataTable.Cell numeric>{formatCurrency(currentValue)}</DataTable.Cell>
                 <DataTable.Cell numeric>
                   <View style={styles.actions}>
                     <IconButton
@@ -351,7 +321,7 @@ const AssetTab = observer(({ lifePlanId, yearData }) => {
 
       {/* FABボタン */}
       <FAB
-        icon="plus"
+        icon="plus-circle"
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         onPress={() => setModalVisible(true)}
       />
@@ -398,8 +368,8 @@ const styles = StyleSheet.create({
     margin: THEME.spacing.md,
   },
   summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginVertical: THEME.spacing.xs,
   },
   summaryItem: {
@@ -407,7 +377,7 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: THEME.typography.h5,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   totalReturn: {
     marginTop: THEME.spacing.md,
@@ -417,7 +387,7 @@ const styles = StyleSheet.create({
   },
   totalReturnValue: {
     fontSize: THEME.typography.h4,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: COLORS.accent.success,
   },
   returnRate: {
@@ -434,13 +404,13 @@ const styles = StyleSheet.create({
     marginVertical: THEME.spacing.md,
   },
   legendContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: THEME.spacing.sm,
   },
   legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginHorizontal: THEME.spacing.md,
   },
   legendColor: {
@@ -451,19 +421,19 @@ const styles = StyleSheet.create({
   },
   emptyChart: {
     height: 220,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: THEME.typography.body1,
     color: COLORS.grey[600],
   },
   actions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     margin: THEME.spacing.md,
     right: 0,
     bottom: 0,

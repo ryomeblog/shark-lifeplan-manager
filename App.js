@@ -1,28 +1,18 @@
-import { useDeviceOrientation } from "@react-native-community/hooks";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import "react-native-get-random-values";
-import {
-  Button,
-  DefaultTheme,
-  Provider as PaperProvider,
-} from "react-native-paper";
-import { COLORS, THEME } from "./src/constants";
-import { rootStore } from "./src/stores/RootStore";
+import { useDeviceOrientation } from '@react-native-community/hooks';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
+import 'react-native-get-random-values';
+import { Button, MD3LightTheme, Provider as PaperProvider } from 'react-native-paper';
+import { COLORS, THEME } from './src/constants';
+import { rootStore } from './src/stores/RootStore';
 
 // スクリーンのインポート
-import DetailScreen from "./src/screens/detail/DetailScreen";
-import HomeScreen from "./src/screens/home/HomeScreen";
-import YearlyListScreen from "./src/screens/yearly/YearlyListScreen";
+import DetailScreen from './src/screens/detail/DetailScreen';
+import HomeScreen from './src/screens/home/HomeScreen';
+import YearlyListScreen from './src/screens/yearly/YearlyListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,7 +32,7 @@ const App = observer(() => {
         await rootStore.initialize();
         setIsLoading(false);
       } catch (error) {
-        console.error("アプリケーションの初期化に失敗しました:", error);
+        console.error('アプリケーションの初期化に失敗しました:', error);
         setIsError(true);
         setIsLoading(false);
       }
@@ -74,9 +64,9 @@ const App = observer(() => {
 
   // React Native Paperのテーマ設定
   const theme = {
-    ...DefaultTheme,
+    ...MD3LightTheme,
     colors: {
-      ...DefaultTheme.colors,
+      ...MD3LightTheme.colors,
       primary: COLORS.primary.main,
       accent: COLORS.secondary.main,
       background: COLORS.common.white,
@@ -88,14 +78,12 @@ const App = observer(() => {
     spacing: THEME.spacing,
     borderRadius: THEME.borderRadius,
     typography: THEME.typography,
+    version: 3,
   };
 
   return (
     <PaperProvider theme={theme}>
-      <StatusBar
-        backgroundColor={COLORS.primary.dark}
-        barStyle="light-content"
-      />
+      <StatusBar backgroundColor={COLORS.primary.dark} barStyle="light-content" />
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName="Home"
@@ -107,27 +95,26 @@ const App = observer(() => {
             headerTitleStyle: {
               fontSize: THEME.typography.h4,
             },
-          }}
-        >
+          }}>
           <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{
-              title: "ライフプラン一覧",
+              title: 'ライフプラン一覧',
             }}
           />
           <Stack.Screen
             name="YearlyList"
             component={YearlyListScreen}
             options={{
-              title: "年別収支一覧",
+              title: '年別収支一覧',
             }}
           />
           <Stack.Screen
             name="Detail"
             component={DetailScreen}
             options={{
-              title: "収支イベント資産管理",
+              title: '収支イベント資産管理',
             }}
           />
         </Stack.Navigator>
@@ -168,8 +155,8 @@ const ErrorScreen = ({ message, onRetry }) => {
 const styles = StyleSheet.create({
   centerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: COLORS.common.white,
   },
   loadingText: {

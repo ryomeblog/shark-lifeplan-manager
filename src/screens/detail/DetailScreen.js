@@ -1,16 +1,16 @@
-import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { useTheme } from "react-native-paper";
-import { TabBar, TabView } from "react-native-tab-view";
-import { COLORS, THEME } from "../../constants";
-import { rootStore } from "../../stores/RootStore";
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
+import { TabBar, TabBarItem, TabView } from 'react-native-tab-view';
+import { COLORS, THEME } from '../../constants';
+import { rootStore } from '../../stores/RootStore';
 
 // タブコンポーネントのインポート
-import AssetTab from "./tabs/AssetTab";
-import EventTab from "./tabs/EventTab";
-import ExpenseTab from "./tabs/ExpenseTab";
-import IncomeTab from "./tabs/IncomeTab";
+import AssetTab from './tabs/AssetTab';
+import EventTab from './tabs/EventTab';
+import ExpenseTab from './tabs/ExpenseTab';
+import IncomeTab from './tabs/IncomeTab';
 
 /**
  * 収支イベント資産管理画面
@@ -18,6 +18,17 @@ import IncomeTab from "./tabs/IncomeTab";
 const DetailScreen = observer(({ route, navigation }) => {
   const theme = useTheme();
   const { lifePlanId, yearId, year } = route.params;
+
+  useEffect(() => {
+    console.log(
+      `DetailScreen: 画面がマウントされました (LifePlanId: ${lifePlanId}, YearId: ${yearId}, Year: ${year})`,
+    );
+    return () => {
+      console.log(
+        `DetailScreen: 画面がアンマウントされました (LifePlanId: ${lifePlanId}, YearId: ${yearId}, Year: ${year})`,
+      );
+    };
+  }, [lifePlanId, yearId, year]);
 
   // 画面のタイトルを設定
   React.useLayoutEffect(() => {
@@ -29,15 +40,15 @@ const DetailScreen = observer(({ route, navigation }) => {
   // タブの状態管理
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: "expense", title: "支出" },
-    { key: "income", title: "収入" },
-    { key: "asset", title: "資産" },
-    { key: "event", title: "イベント" },
+    { key: 'expense', title: '支出' },
+    { key: 'income', title: '収入' },
+    { key: 'asset', title: '資産' },
+    { key: 'event', title: 'イベント' },
   ]);
 
   // ライフプランと年別データの取得
   const lifePlan = rootStore.lifePlanStore.lifePlans.get(lifePlanId);
-  const yearData = lifePlan?.yearlyFinances.find((yf) => yf.id === yearId);
+  const yearData = lifePlan?.yearlyFinances.find(yf => yf.id === yearId);
 
   if (!lifePlan || !yearData) {
     return (
@@ -52,13 +63,13 @@ const DetailScreen = observer(({ route, navigation }) => {
    */
   const renderScene = ({ route }) => {
     switch (route.key) {
-      case "expense":
+      case 'expense':
         return <ExpenseTab lifePlanId={lifePlanId} yearData={yearData} />;
-      case "income":
+      case 'income':
         return <IncomeTab lifePlanId={lifePlanId} yearData={yearData} />;
-      case "asset":
+      case 'asset':
         return <AssetTab lifePlanId={lifePlanId} yearData={yearData} />;
-      case "event":
+      case 'event':
         return <EventTab lifePlanId={lifePlanId} yearData={yearData} />;
       default:
         return null;
@@ -68,12 +79,18 @@ const DetailScreen = observer(({ route, navigation }) => {
   /**
    * タブバーのレンダリング
    */
-  const renderTabBar = (props) => (
+  const renderTabBarItem = props => {
+    const { key, ...rest } = props;
+    return <TabBarItem key={key} {...rest} />;
+  };
+
+  const renderTabBar = props => (
     <TabBar
       {...props}
       indicatorStyle={{ backgroundColor: theme.colors.primary }}
       style={{ backgroundColor: COLORS.common.white }}
       labelStyle={styles.tabLabel}
+      renderTabBarItem={renderTabBarItem}
       activeColor={theme.colors.primary}
       inactiveColor={COLORS.grey[600]}
     />
@@ -86,7 +103,7 @@ const DetailScreen = observer(({ route, navigation }) => {
         renderScene={renderScene}
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}
-        initialLayout={{ width: DEVICE.width }}
+        initialLayout={{ width: Dimensions.get('window').width }}
         style={styles.tabView}
       />
     </View>
@@ -100,16 +117,16 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabView: {
     flex: 1,
   },
   tabLabel: {
     fontSize: THEME.typography.body2,
-    fontWeight: "bold",
-    textTransform: "none",
+    fontWeight: 'bold',
+    textTransform: 'none',
   },
 });
 

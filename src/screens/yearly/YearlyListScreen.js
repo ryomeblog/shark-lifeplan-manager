@@ -1,22 +1,15 @@
-import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import {
-  Button,
-  DataTable,
-  IconButton,
-  Portal,
-  Text,
-  useTheme,
-} from "react-native-paper";
-import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../constants";
-import { rootStore } from "../../stores/RootStore";
-import { formatCurrency } from "../../utils/format";
-import CategoryModal from "./components/CategoryModal";
-import ExpenseGroupModal from "./components/ExpenseGroupModal";
-import IncomeGroupModal from "./components/IncomeGroupModal";
-import YearCopyModal from "./components/YearCopyModal";
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, DataTable, IconButton, Portal, Text, useTheme } from 'react-native-paper';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../constants';
+import { rootStore } from '../../stores/RootStore';
+import { formatCurrency } from '../../utils/format';
+import CategoryModal from './components/CategoryModal';
+import ExpenseGroupModal from './components/ExpenseGroupModal';
+import IncomeGroupModal from './components/IncomeGroupModal';
+import YearCopyModal from './components/YearCopyModal';
 
 /**
  * 年別収支一覧画面
@@ -26,11 +19,15 @@ const YearlyListScreen = observer(({ route, navigation }) => {
   const { lifePlanId } = route.params;
   const lifePlan = rootStore.lifePlanStore.lifePlans.get(lifePlanId);
 
+  useEffect(() => {
+    console.log(`YearlyListScreen: 画面がマウントされました (LifePlanId: ${lifePlanId})`);
+    return () =>
+      console.log(`YearlyListScreen: 画面がアンマウントされました (LifePlanId: ${lifePlanId})`);
+  }, [lifePlanId]);
+
   // モーダルの表示状態
-  const [isExpenseGroupModalVisible, setExpenseGroupModalVisible] =
-    useState(false);
-  const [isIncomeGroupModalVisible, setIncomeGroupModalVisible] =
-    useState(false);
+  const [isExpenseGroupModalVisible, setExpenseGroupModalVisible] = useState(false);
+  const [isIncomeGroupModalVisible, setIncomeGroupModalVisible] = useState(false);
   const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
   const [categoryType, setCategoryType] = useState(null);
   const [isYearCopyModalVisible, setYearCopyModalVisible] = useState(false);
@@ -53,13 +50,9 @@ const YearlyListScreen = observer(({ route, navigation }) => {
   /**
    * 年別データのコピー
    */
-  const handleCopyYear = (targetYear) => {
+  const handleCopyYear = targetYear => {
     if (selectedYear) {
-      rootStore.lifePlanStore.copyYearlyFinance(
-        lifePlanId,
-        selectedYear.id,
-        targetYear,
-      );
+      rootStore.lifePlanStore.copyYearlyFinance(lifePlanId, selectedYear.id, targetYear);
       setYearCopyModalVisible(false);
       setSelectedYear(null);
     }
@@ -68,8 +61,8 @@ const YearlyListScreen = observer(({ route, navigation }) => {
   /**
    * 年の選択
    */
-  const handleSelectYear = (yearData) => {
-    navigation.navigate("Detail", {
+  const handleSelectYear = yearData => {
+    navigation.navigate('Detail', {
       lifePlanId,
       yearId: yearData.id,
       year: yearData.year,
@@ -79,7 +72,7 @@ const YearlyListScreen = observer(({ route, navigation }) => {
   /**
    * カテゴリ管理モーダルを開く
    */
-  const openCategoryModal = (type) => {
+  const openCategoryModal = type => {
     setCategoryType(type);
     setCategoryModalVisible(true);
   };
@@ -99,36 +92,22 @@ const YearlyListScreen = observer(({ route, navigation }) => {
         <Button
           mode="outlined"
           onPress={() => setExpenseGroupModalVisible(true)}
-          style={styles.button}
-        >
+          style={styles.button}>
           支出グループ管理
         </Button>
         <Button
           mode="outlined"
           onPress={() => setIncomeGroupModalVisible(true)}
-          style={styles.button}
-        >
+          style={styles.button}>
           収入グループ管理
         </Button>
-        <Button
-          mode="outlined"
-          onPress={() => openCategoryModal("expense")}
-          style={styles.button}
-        >
+        <Button mode="outlined" onPress={() => openCategoryModal('expense')} style={styles.button}>
           支出カテゴリ管理
         </Button>
-        <Button
-          mode="outlined"
-          onPress={() => openCategoryModal("income")}
-          style={styles.button}
-        >
+        <Button mode="outlined" onPress={() => openCategoryModal('income')} style={styles.button}>
           収入カテゴリ管理
         </Button>
-        <Button
-          mode="outlined"
-          onPress={() => openCategoryModal("asset")}
-          style={styles.button}
-        >
+        <Button mode="outlined" onPress={() => openCategoryModal('asset')} style={styles.button}>
           資産カテゴリ管理
         </Button>
       </View>
@@ -144,36 +123,23 @@ const YearlyListScreen = observer(({ route, navigation }) => {
             <DataTable.Title numeric>アクション</DataTable.Title>
           </DataTable.Header>
 
-          {lifePlan.yearlyFinances.map((yearData) => {
-            const totalIncome = yearData.incomes.reduce(
-              (sum, income) => sum + income.amount,
-              0,
-            );
+          {lifePlan.yearlyFinances.map(yearData => {
+            const totalIncome = yearData.incomes.reduce((sum, income) => sum + income.amount, 0);
             const totalExpense = yearData.expenses.reduce(
               (sum, expense) => sum + expense.amount,
               0,
             );
-            const totalAsset = yearData.assets.reduce(
-              (sum, asset) => sum + asset.initialAmount,
-              0,
-            );
+            const totalAsset = yearData.assets.reduce((sum, asset) => sum + asset.initialAmount, 0);
 
             return (
               <DataTable.Row
                 key={yearData.id}
                 onPress={() => handleSelectYear(yearData)}
-                style={styles.row}
-              >
+                style={styles.row}>
                 <DataTable.Cell>{yearData.year}年</DataTable.Cell>
-                <DataTable.Cell numeric>
-                  {formatCurrency(totalIncome)}
-                </DataTable.Cell>
-                <DataTable.Cell numeric>
-                  {formatCurrency(totalExpense)}
-                </DataTable.Cell>
-                <DataTable.Cell numeric>
-                  {formatCurrency(totalAsset)}
-                </DataTable.Cell>
+                <DataTable.Cell numeric>{formatCurrency(totalIncome)}</DataTable.Cell>
+                <DataTable.Cell numeric>{formatCurrency(totalExpense)}</DataTable.Cell>
+                <DataTable.Cell numeric>{formatCurrency(totalAsset)}</DataTable.Cell>
                 <DataTable.Cell numeric>
                   <View style={styles.actions}>
                     <IconButton
@@ -258,12 +224,12 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     padding: THEME.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey[200],
@@ -278,8 +244,8 @@ const styles = StyleSheet.create({
     minHeight: 60,
   },
   actions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 

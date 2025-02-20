@@ -1,21 +1,13 @@
-import { observer } from "mobx-react-lite";
-import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import {
-  Card,
-  Chip,
-  FAB,
-  IconButton,
-  Portal,
-  Text,
-  Title,
-  useTheme,
-} from "react-native-paper";
-import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../../constants";
-import { rootStore } from "../../../stores/RootStore";
-import { formatCurrency, formatDate } from "../../../utils/format";
-import EventModal from "../components/EventModal";
+import { observer } from 'mobx-react-lite';
+import { nanoid } from 'nanoid';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Card, Chip, FAB, IconButton, Portal, Text, Title, useTheme } from 'react-native-paper';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../../constants';
+import { rootStore } from '../../../stores/RootStore';
+import format from '../../../utils/format';
+import EventModal from '../components/EventModal';
 
 /**
  * イベントタブ
@@ -32,15 +24,13 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
    * イベントを日付順にソート
    */
   const sortedEvents = useMemo(() => {
-    return [...yearData.events].sort(
-      (a, b) => new Date(a.date) - new Date(b.date),
-    );
+    return [...yearData.events].sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [yearData.events]);
 
   /**
    * イベントの作成
    */
-  const handleCreate = (data) => {
+  const handleCreate = data => {
     rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
       events: [...yearData.events, { id: nanoid(), ...data }],
     });
@@ -50,9 +40,9 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
   /**
    * イベントの更新
    */
-  const handleUpdate = (data) => {
+  const handleUpdate = data => {
     if (editingEvent) {
-      const updatedEvents = yearData.events.map((event) =>
+      const updatedEvents = yearData.events.map(event =>
         event.id === editingEvent.id ? { ...event, ...data } : event,
       );
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
@@ -68,9 +58,7 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
    */
   const handleDelete = () => {
     if (editingEvent) {
-      const updatedEvents = yearData.events.filter(
-        (event) => event.id !== editingEvent.id,
-      );
+      const updatedEvents = yearData.events.filter(event => event.id !== editingEvent.id);
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
         events: updatedEvents,
       });
@@ -82,7 +70,7 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
   /**
    * 関連する収支・資産データの取得
    */
-  const getLinkedItems = (impactDetails) => {
+  const getLinkedItems = impactDetails => {
     const items = {
       incomes: [],
       expenses: [],
@@ -90,19 +78,15 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
     };
 
     if (impactDetails.incomes) {
-      items.incomes = yearData.incomes.filter((income) =>
-        impactDetails.incomes.includes(income.id),
-      );
+      items.incomes = yearData.incomes.filter(income => impactDetails.incomes.includes(income.id));
     }
     if (impactDetails.expenses) {
-      items.expenses = yearData.expenses.filter((expense) =>
+      items.expenses = yearData.expenses.filter(expense =>
         impactDetails.expenses.includes(expense.id),
       );
     }
     if (impactDetails.assets) {
-      items.assets = yearData.assets.filter((asset) =>
-        impactDetails.assets.includes(asset.id),
-      );
+      items.assets = yearData.assets.filter(asset => impactDetails.assets.includes(asset.id));
     }
 
     return items;
@@ -112,7 +96,7 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
     <View style={styles.container}>
       <ScrollView style={styles.content}>
         {sortedEvents.length > 0 ? (
-          sortedEvents.map((event) => {
+          sortedEvents.map(event => {
             const linkedItems = getLinkedItems(event.impactDetails || {});
 
             return (
@@ -121,9 +105,7 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
                   <View style={styles.eventHeader}>
                     <View style={styles.eventTitleContainer}>
                       <Title>{event.name}</Title>
-                      <Text style={styles.eventDate}>
-                        {formatDate(event.date)}
-                      </Text>
+                      <Text style={styles.eventDate}>{format.formatDate(event.date)}</Text>
                     </View>
                     <View style={styles.actions}>
                       <IconButton
@@ -145,9 +127,7 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
                     </View>
                   </View>
 
-                  {event.description && (
-                    <Text style={styles.description}>{event.description}</Text>
-                  )}
+                  {event.description && <Text style={styles.description}>{event.description}</Text>}
 
                   {/* 関連する収支・資産 */}
                   {(linkedItems.incomes.length > 0 ||
@@ -157,13 +137,12 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
                       {linkedItems.incomes.length > 0 && (
                         <View style={styles.itemSection}>
                           <Text style={styles.sectionTitle}>関連する収入</Text>
-                          {linkedItems.incomes.map((income) => (
+                          {linkedItems.incomes.map(income => (
                             <Chip
                               key={income.id}
                               style={styles.itemChip}
-                              textStyle={styles.chipText}
-                            >
-                              {income.name}: {formatCurrency(income.amount)}
+                              textStyle={styles.chipText}>
+                              {income.name}: {format.formatCurrency(income.amount)}
                             </Chip>
                           ))}
                         </View>
@@ -172,13 +151,12 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
                       {linkedItems.expenses.length > 0 && (
                         <View style={styles.itemSection}>
                           <Text style={styles.sectionTitle}>関連する支出</Text>
-                          {linkedItems.expenses.map((expense) => (
+                          {linkedItems.expenses.map(expense => (
                             <Chip
                               key={expense.id}
                               style={styles.itemChip}
-                              textStyle={styles.chipText}
-                            >
-                              {expense.name}: {formatCurrency(expense.amount)}
+                              textStyle={styles.chipText}>
+                              {expense.name}: {format.formatCurrency(expense.amount)}
                             </Chip>
                           ))}
                         </View>
@@ -187,14 +165,12 @@ const EventTab = observer(({ lifePlanId, yearData }) => {
                       {linkedItems.assets.length > 0 && (
                         <View style={styles.itemSection}>
                           <Text style={styles.sectionTitle}>関連する資産</Text>
-                          {linkedItems.assets.map((asset) => (
+                          {linkedItems.assets.map(asset => (
                             <Chip
                               key={asset.id}
                               style={styles.itemChip}
-                              textStyle={styles.chipText}
-                            >
-                              {asset.name}:{" "}
-                              {formatCurrency(asset.initialAmount)}
+                              textStyle={styles.chipText}>
+                              {asset.name}: {format.formatCurrency(asset.initialAmount)}
                             </Chip>
                           ))}
                         </View>
@@ -262,9 +238,9 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.md,
   },
   eventHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   eventTitleContainer: {
     flex: 1,
@@ -280,7 +256,7 @@ const styles = StyleSheet.create({
     marginTop: THEME.spacing.sm,
   },
   actions: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   linkedItems: {
     marginTop: THEME.spacing.md,
@@ -303,8 +279,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: THEME.spacing.xl,
   },
   emptyText: {
@@ -312,7 +288,7 @@ const styles = StyleSheet.create({
     color: COLORS.grey[600],
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     margin: THEME.spacing.md,
     right: 0,
     bottom: 0,

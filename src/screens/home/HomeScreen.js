@@ -1,20 +1,12 @@
-import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import {
-  Button,
-  DataTable,
-  FAB,
-  IconButton,
-  Portal,
-  Text,
-  useTheme,
-} from "react-native-paper";
-import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../constants";
-import { rootStore } from "../../stores/RootStore";
-import { formatDate } from "../../utils/format";
-import LifePlanModal from "./components/LifePlanModal";
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, DataTable, FAB, IconButton, Portal, Text, useTheme } from 'react-native-paper';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../constants';
+import { rootStore } from '../../stores/RootStore';
+import { formatDate } from '../../utils/format';
+import LifePlanModal from './components/LifePlanModal';
 
 /**
  * ライフプラン一覧画面
@@ -26,12 +18,17 @@ const HomeScreen = observer(({ navigation }) => {
   const [selectedLifePlan, setSelectedLifePlan] = useState(null);
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
+  useEffect(() => {
+    console.log('HomeScreen: 画面がマウントされました');
+    return () => console.log('HomeScreen: 画面がアンマウントされました');
+  }, []);
+
   const lifePlans = rootStore.lifePlanStore.sortedLifePlans;
 
   /**
    * ライフプランの作成
    */
-  const handleCreate = (data) => {
+  const handleCreate = data => {
     rootStore.lifePlanStore.createLifePlan(data);
     setCreateModalVisible(false);
   };
@@ -39,7 +36,7 @@ const HomeScreen = observer(({ navigation }) => {
   /**
    * ライフプランの更新
    */
-  const handleUpdate = (data) => {
+  const handleUpdate = data => {
     if (selectedLifePlan) {
       rootStore.lifePlanStore.updateLifePlan(selectedLifePlan.id, data);
       setEditModalVisible(false);
@@ -61,16 +58,16 @@ const HomeScreen = observer(({ navigation }) => {
   /**
    * ライフプランのコピー
    */
-  const handleCopy = (lifePlan) => {
+  const handleCopy = lifePlan => {
     rootStore.lifePlanStore.copyLifePlan(lifePlan.id);
   };
 
   /**
    * ライフプラン選択時の処理
    */
-  const handleSelect = (lifePlan) => {
+  const handleSelect = lifePlan => {
     rootStore.lifePlanStore.activeLifePlanId = lifePlan.id;
-    navigation.navigate("YearlyList", { lifePlanId: lifePlan.id });
+    navigation.navigate('YearlyList', { lifePlanId: lifePlan.id });
   };
 
   return (
@@ -84,12 +81,11 @@ const HomeScreen = observer(({ navigation }) => {
             <DataTable.Title numeric>アクション</DataTable.Title>
           </DataTable.Header>
 
-          {lifePlans.map((lifePlan) => (
+          {lifePlans.map(lifePlan => (
             <DataTable.Row
               key={lifePlan.id}
               onPress={() => handleSelect(lifePlan)}
-              style={styles.row}
-            >
+              style={styles.row}>
               <DataTable.Cell>
                 <Text>{lifePlan.name}</Text>
                 {lifePlan.description && (
@@ -98,9 +94,7 @@ const HomeScreen = observer(({ navigation }) => {
                   </Text>
                 )}
               </DataTable.Cell>
-              <DataTable.Cell>
-                {formatDate(lifePlan.startYear, "yyyy")}
-              </DataTable.Cell>
+              <DataTable.Cell>{formatDate(lifePlan.startYear, 'yyyy')}</DataTable.Cell>
               <DataTable.Cell>{lifePlan.lifespan}年</DataTable.Cell>
               <DataTable.Cell numeric>
                 <View style={styles.actions}>
@@ -112,11 +106,7 @@ const HomeScreen = observer(({ navigation }) => {
                       setEditModalVisible(true);
                     }}
                   />
-                  <IconButton
-                    icon="content-copy"
-                    size={20}
-                    onPress={() => handleCopy(lifePlan)}
-                  />
+                  <IconButton icon="content-copy" size={20} onPress={() => handleCopy(lifePlan)} />
                   <IconButton
                     icon="delete"
                     size={20}
@@ -133,14 +123,11 @@ const HomeScreen = observer(({ navigation }) => {
 
         {lifePlans.length === 0 && (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              ライフプランが登録されていません
-            </Text>
+            <Text style={styles.emptyText}>ライフプランが登録されていません</Text>
             <Button
               mode="contained"
               onPress={() => setCreateModalVisible(true)}
-              style={styles.createButton}
-            >
+              style={styles.createButton}>
               ライフプランを作成
             </Button>
           </View>
@@ -209,12 +196,12 @@ const styles = StyleSheet.create({
     marginTop: THEME.spacing.xs,
   },
   actions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   emptyContainer: {
     padding: THEME.spacing.xl,
-    alignItems: "center",
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: THEME.typography.body1,
@@ -225,7 +212,7 @@ const styles = StyleSheet.create({
     marginTop: THEME.spacing.md,
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     margin: THEME.spacing.md,
     right: 0,
     bottom: 0,

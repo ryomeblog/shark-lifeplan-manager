@@ -1,20 +1,14 @@
-import { observer } from "mobx-react-lite";
-import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { PieChart } from "react-native-chart-kit";
-import {
-  DataTable,
-  FAB,
-  IconButton,
-  Portal,
-  Text,
-  useTheme,
-} from "react-native-paper";
-import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../../constants";
-import { rootStore } from "../../../stores/RootStore";
-import { formatCurrency } from "../../../utils/format";
-import ExpenseModal from "../components/ExpenseModal";
+import { observer } from 'mobx-react-lite';
+import { nanoid } from 'nanoid';
+import React, { useMemo, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
+import { DataTable, FAB, IconButton, Portal, Text, useTheme } from 'react-native-paper';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../../constants';
+import { rootStore } from '../../../stores/RootStore';
+import { formatCurrency } from '../../../utils/format';
+import ExpenseModal from '../components/ExpenseModal';
 
 /**
  * 支出タブ
@@ -32,14 +26,14 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
    */
   const categoryData = useMemo(() => {
     const data = new Map();
-    yearData.expenses.forEach((expense) => {
+    yearData.expenses.forEach(expense => {
       const amount = data.get(expense.category) || 0;
       data.set(expense.category, amount + expense.amount);
     });
 
     const categories = rootStore.categoryStore.sortedExpenseCategories;
     return Array.from(data.entries()).map(([category, amount]) => {
-      const categoryInfo = categories.find((c) => c.name === category);
+      const categoryInfo = categories.find(c => c.name === category);
       return {
         name: category,
         amount,
@@ -60,7 +54,7 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
   /**
    * 支出の作成
    */
-  const handleCreate = (data) => {
+  const handleCreate = data => {
     rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
       expenses: [...yearData.expenses, { id: nanoid(), ...data }],
     });
@@ -70,9 +64,9 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
   /**
    * 支出の更新
    */
-  const handleUpdate = (data) => {
+  const handleUpdate = data => {
     if (editingExpense) {
-      const updatedExpenses = yearData.expenses.map((expense) =>
+      const updatedExpenses = yearData.expenses.map(expense =>
         expense.id === editingExpense.id ? { ...expense, ...data } : expense,
       );
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
@@ -88,9 +82,7 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
    */
   const handleDelete = () => {
     if (editingExpense) {
-      const updatedExpenses = yearData.expenses.filter(
-        (expense) => expense.id !== editingExpense.id,
-      );
+      const updatedExpenses = yearData.expenses.filter(expense => expense.id !== editingExpense.id);
       rootStore.lifePlanStore.updateYearlyFinance(lifePlanId, yearData.id, {
         expenses: updatedExpenses,
       });
@@ -107,7 +99,7 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
           <View style={styles.chartContainer}>
             <PieChart
               data={categoryData}
-              width={DEVICE.width - THEME.spacing.lg * 2}
+              width={Dimensions.get('window').width - THEME.spacing.lg * 2}
               height={220}
               chartConfig={{
                 color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
@@ -117,9 +109,7 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
               paddingLeft="15"
               absolute
             />
-            <Text style={styles.totalAmount}>
-              総支出額: {formatCurrency(totalExpense)}
-            </Text>
+            <Text style={styles.totalAmount}>総支出額: {formatCurrency(totalExpense)}</Text>
           </View>
         ) : (
           <View style={styles.emptyChart}>
@@ -137,13 +127,11 @@ const ExpenseTab = observer(({ lifePlanId, yearData }) => {
             <DataTable.Title numeric>アクション</DataTable.Title>
           </DataTable.Header>
 
-          {yearData.expenses.map((expense) => (
+          {yearData.expenses.map(expense => (
             <DataTable.Row key={expense.id}>
               <DataTable.Cell>{expense.name}</DataTable.Cell>
               <DataTable.Cell>{expense.category}</DataTable.Cell>
-              <DataTable.Cell numeric>
-                {formatCurrency(expense.amount)}
-              </DataTable.Cell>
+              <DataTable.Cell numeric>{formatCurrency(expense.amount)}</DataTable.Cell>
               <DataTable.Cell numeric>{expense.frequency}</DataTable.Cell>
               <DataTable.Cell numeric>
                 <View style={styles.actions}>
@@ -216,28 +204,28 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     padding: THEME.spacing.lg,
-    alignItems: "center",
+    alignItems: 'center',
   },
   totalAmount: {
     fontSize: THEME.typography.h4,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: THEME.spacing.md,
   },
   emptyChart: {
     height: 220,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: THEME.typography.body1,
     color: COLORS.grey[600],
   },
   actions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     margin: THEME.spacing.md,
     right: 0,
     bottom: 0,

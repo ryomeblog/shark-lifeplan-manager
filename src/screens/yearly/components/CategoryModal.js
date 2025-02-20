@@ -1,19 +1,13 @@
-import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { ColorPicker } from "react-native-color-picker";
-import {
-  Button,
-  IconButton,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-} from "react-native-paper";
-import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import { COLORS, THEME } from "../../../constants";
-import { rootStore } from "../../../stores/RootStore";
-import { validateColorCode } from "../../../utils/validate";
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { ColorPicker } from 'react-native-color-picker';
+import { Button, IconButton, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import { COLORS, THEME } from '../../../constants';
+import { rootStore } from '../../../stores/RootStore';
+import { logModalShow } from '../../../utils/logger';
+import { validateColorCode } from '../../../utils/validate';
 
 /**
  * カテゴリ管理モーダル
@@ -25,8 +19,8 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   // フォームの状態管理
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [color, setColor] = useState(COLORS.primary.main);
   const [error, setError] = useState(null);
 
@@ -35,11 +29,11 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
    */
   const getCategories = () => {
     switch (type) {
-      case "income":
+      case 'income':
         return rootStore.categoryStore.sortedIncomeCategories;
-      case "expense":
+      case 'expense':
         return rootStore.categoryStore.sortedExpenseCategories;
-      case "asset":
+      case 'asset':
         return rootStore.categoryStore.sortedAssetCategories;
       default:
         return [];
@@ -51,17 +45,17 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
    */
   const handleCreate = () => {
     try {
-      validateColorCode(color, "カラー");
+      validateColorCode(color, 'カラー');
       const data = { name, description, color };
 
       switch (type) {
-        case "income":
+        case 'income':
           rootStore.categoryStore.createIncomeCategory(data);
           break;
-        case "expense":
+        case 'expense':
           rootStore.categoryStore.createExpenseCategory(data);
           break;
-        case "asset":
+        case 'asset':
           rootStore.categoryStore.createAssetCategory(data);
           break;
       }
@@ -78,23 +72,17 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
    */
   const handleUpdate = () => {
     try {
-      validateColorCode(color, "カラー");
+      validateColorCode(color, 'カラー');
       const data = { name, description, color };
 
       switch (type) {
-        case "income":
-          rootStore.categoryStore.updateIncomeCategory(
-            editingCategory.id,
-            data,
-          );
+        case 'income':
+          rootStore.categoryStore.updateIncomeCategory(editingCategory.id, data);
           break;
-        case "expense":
-          rootStore.categoryStore.updateExpenseCategory(
-            editingCategory.id,
-            data,
-          );
+        case 'expense':
+          rootStore.categoryStore.updateExpenseCategory(editingCategory.id, data);
           break;
-        case "asset":
+        case 'asset':
           rootStore.categoryStore.updateAssetCategory(editingCategory.id, data);
           break;
       }
@@ -112,13 +100,13 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
   const handleDelete = () => {
     if (editingCategory) {
       switch (type) {
-        case "income":
+        case 'income':
           rootStore.categoryStore.deleteIncomeCategory(editingCategory.id);
           break;
-        case "expense":
+        case 'expense':
           rootStore.categoryStore.deleteExpenseCategory(editingCategory.id);
           break;
-        case "asset":
+        case 'asset':
           rootStore.categoryStore.deleteAssetCategory(editingCategory.id);
           break;
       }
@@ -132,8 +120,8 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
    * フォームのリセット
    */
   const resetForm = () => {
-    setName("");
-    setDescription("");
+    setName('');
+    setDescription('');
     setColor(COLORS.primary.main);
     setEditingCategory(null);
     setError(null);
@@ -142,10 +130,10 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
   /**
    * 編集の開始
    */
-  const startEditing = (category) => {
+  const startEditing = category => {
     setEditingCategory(category);
     setName(category.name);
-    setDescription(category.description || "");
+    setDescription(category.description || '');
     setColor(category.color);
   };
 
@@ -160,14 +148,14 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
   // カテゴリ種別に応じたタイトル
   const getTitle = () => {
     switch (type) {
-      case "income":
-        return "収入カテゴリ管理";
-      case "expense":
-        return "支出カテゴリ管理";
-      case "asset":
-        return "資産カテゴリ管理";
+      case 'income':
+        return '収入カテゴリ管理';
+      case 'expense':
+        return '支出カテゴリ管理';
+      case 'asset':
+        return '資産カテゴリ管理';
       default:
-        return "カテゴリ管理";
+        return 'カテゴリ管理';
     }
   };
 
@@ -176,38 +164,27 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
       <Modal
         visible={visible}
         onDismiss={handleDismiss}
-        contentContainerStyle={styles.modalContainer}
-      >
+        onShow={() => logModalShow('カテゴリ管理モーダル')}
+        contentContainerStyle={styles.modalContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>{getTitle()}</Text>
         </View>
 
         <ScrollView style={styles.content}>
           {/* カテゴリ一覧 */}
-          {getCategories().map((category) => (
+          {getCategories().map(category => (
             <View key={category.id} style={styles.categoryItem}>
               <View style={styles.categoryInfo}>
-                <View
-                  style={[
-                    styles.colorPreview,
-                    { backgroundColor: category.color },
-                  ]}
-                />
+                <View style={[styles.colorPreview, { backgroundColor: category.color }]} />
                 <View style={styles.categoryText}>
                   <Text style={styles.categoryName}>{category.name}</Text>
                   {category.description && (
-                    <Text style={styles.categoryDescription}>
-                      {category.description}
-                    </Text>
+                    <Text style={styles.categoryDescription}>{category.description}</Text>
                   )}
                 </View>
               </View>
               <View style={styles.categoryActions}>
-                <IconButton
-                  icon="pencil"
-                  size={20}
-                  onPress={() => startEditing(category)}
-                />
+                <IconButton icon="pencil" size={20} onPress={() => startEditing(category)} />
                 <IconButton
                   icon="delete"
                   size={20}
@@ -240,16 +217,11 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
               <Button
                 mode="outlined"
                 onPress={() => setShowColorPicker(true)}
-                style={styles.colorButton}
-              >
+                style={styles.colorButton}>
                 カラーを選択
               </Button>
               <View
-                style={[
-                  styles.colorPreview,
-                  styles.colorPreviewLarge,
-                  { backgroundColor: color },
-                ]}
+                style={[styles.colorPreview, styles.colorPreviewLarge, { backgroundColor: color }]}
               />
             </View>
             {error && <Text style={styles.errorText}>{error}</Text>}
@@ -257,19 +229,14 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Button
-            mode="outlined"
-            onPress={handleDismiss}
-            style={styles.footerButton}
-          >
+          <Button mode="outlined" onPress={handleDismiss} style={styles.footerButton}>
             キャンセル
           </Button>
           <Button
             mode="contained"
             onPress={editingCategory ? handleUpdate : handleCreate}
-            style={styles.footerButton}
-          >
-            {editingCategory ? "更新" : "作成"}
+            style={styles.footerButton}>
+            {editingCategory ? '更新' : '作成'}
           </Button>
         </View>
 
@@ -277,10 +244,10 @@ const CategoryModal = observer(({ visible, onDismiss, type }) => {
         <Modal
           visible={showColorPicker}
           onDismiss={() => setShowColorPicker(false)}
-          contentContainerStyle={styles.colorPickerContainer}
-        >
+          onShow={() => logModalShow('カラーピッカーモーダル')}
+          contentContainerStyle={styles.colorPickerContainer}>
           <ColorPicker
-            onColorSelected={(color) => {
+            onColorSelected={color => {
               setColor(color);
               setShowColorPicker(false);
             }}
@@ -311,7 +278,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.common.white,
     margin: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.md,
-    maxHeight: "90%",
+    maxHeight: '90%',
   },
   header: {
     padding: THEME.spacing.md,
@@ -320,22 +287,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: THEME.typography.h3,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   content: {
     padding: THEME.spacing.md,
   },
   categoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: THEME.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey[200],
   },
   categoryInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
   colorPreview: {
@@ -354,14 +321,14 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: THEME.typography.body1,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   categoryDescription: {
     fontSize: THEME.typography.caption,
     color: COLORS.grey[600],
   },
   categoryActions: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   form: {
     marginTop: THEME.spacing.lg,
@@ -373,8 +340,8 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.md,
   },
   colorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: THEME.spacing.md,
   },
   colorLabel: {
@@ -390,8 +357,8 @@ const styles = StyleSheet.create({
     marginTop: THEME.spacing.xs,
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     padding: THEME.spacing.md,
     borderTopWidth: 1,
     borderTopColor: COLORS.grey[200],
